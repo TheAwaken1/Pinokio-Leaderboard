@@ -38,7 +38,7 @@ That’s it. Your token is now ready.
 
 ## Launch the Pinokio Leaderboard app
 
-1. Once lauched, click on terminal tab and stop
+1. Once launched, click on terminal tab and stop
 2. You will see a settings tab right next to the "Start" tab, click on it
 3. A pop up to enter your Github Token pops up, paste your token and save
 4. Relaunch the app and sync
