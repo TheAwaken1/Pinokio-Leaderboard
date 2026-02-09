@@ -1,0 +1,9 @@
+app/node_modules
+app/env
+app/leaderboard.db
+app/package-lock.json
+logs
+.genkit
+config.json
+CLAUDE.md
+SPEC.md

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinokio Leaderboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: rgba(20, 20, 30, 0.8);
+            --bg-card-hover: rgba(30, 30, 45, 0.9);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-verified: #10b981;
+            --accent-verified-glow: rgba(16, 185, 129, 0.3);
+            --accent-community: #f59e0b;
+            --accent-community-glow: rgba(245, 158, 11, 0.3);
+            --accent-star: #fbbf24;
+            --gradient-verified: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-community: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(118, 75, 162, 0.08) 0%, transparent 40%),
+                        radial-gradient(ellipse at 20% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
+            animation: bgPulse 20s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-2%, -2%) rotate(1deg); }
+        }
+
+        /* Header */
+        .header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-hero);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Search & Controls */
+        .controls-section {
+            padding: 1.5rem 0;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .btn-sync {
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-sync:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-sync:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-sync.syncing i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .section-icon.verified {
+            background: var(--gradient-verified);
+            box-shadow: 0 4px 20px var(--accent-verified-glow);
+        }
+
+        .section-icon.community {
+            background: var(--gradient-community);
+            box-shadow: 0 4px 20px var(--accent-community-glow);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .section-count {
+            margin-left: auto;
+            padding: 4px 12px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Script Cards */
+        .scripts-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .script-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .script-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateX(4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .rank {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .rank.gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.1rem;
+        }
+
+        .rank.silver {
+            background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.05rem;
+        }
+
+        .rank.bronze {
+            background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1rem;
+        }
+
+        .script-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid var(--border-color);
+        }
+
+        .script-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .script-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .script-owner {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .script-description {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .script-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .stat i {
+            font-size: 0.9rem;
+        }
+
+        .stat.stars i {
+            color: var(--accent-star);
+        }
+
+        .stat.forks i {
+            color: #8b5cf6;
+        }
+
+        /* Topics/Tags */
+        .topics {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .topic {
+            padding: 2px 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            color: #818cf8;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-verified);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--accent-verified);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header .d-flex {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .stats-bar {
+                justify-content: center;
+            }
+
+            .controls-section .d-flex {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .script-card {
+                flex-wrap: wrap;
+            }
+
+            .script-stats {
+                width: 100%;
+                justify-content: flex-end;
+                padding-top: 8px;
+                border-top: 1px solid var(--border-color);
+                margin-top: 8px;
+            }
+
+            .script-description {
+                display: none;
+            }
+        }
+
+        /* Verified Badge */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent-verified);
+            font-size: 0.75rem;
+        }
+
+        .verified-badge i {
+            font-size: 0.7rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--gradient-hero);
+            border-color: transparent;
+            color: white;
+        }
+
+        .tab .count {
+            margin-left: 8px;
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .script-card {
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .script-card:nth-child(1) { animation-delay: 0.05s; }
+        .script-card:nth-child(2) { animation-delay: 0.1s; }
+        .script-card:nth-child(3) { animation-delay: 0.15s; }
+        .script-card:nth-child(4) { animation-delay: 0.2s; }
+        .script-card:nth-child(5) { animation-delay: 0.25s; }
+        .script-card:nth-child(6) { animation-delay: 0.3s; }
+        .script-card:nth-child(7) { animation-delay: 0.35s; }
+        .script-card:nth-child(8) { animation-delay: 0.4s; }
+        .script-card:nth-child(9) { animation-delay: 0.45s; }
+        .script-card:nth-child(10) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="#" class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    Pinokio Leaderboard
+                </a>
+                <div class="stats-bar" id="stats-bar">
+                    <div class="stat-item">
+                        <i class="fa-solid fa-box"></i>
+                        <span>Total: <span class="stat-value" id="stat-total">--</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fa-solid fa-circle-check" style="color: var(--accent-verified)"></i>
+                        <span>Verified: <span class="stat-value" id="stat-verified">--</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fa-solid fa-users" style="color: var(--accent-community)"></i>
+                        <span>Community: <span class="stat-value" id="stat-community">--</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fa-solid fa-star" style="color: var(--accent-star)"></i>
+                        <span>Stars: <span class="stat-value" id="stat-stars">--</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Controls -->
+    <section class="controls-section">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-input" placeholder="Search scripts, authors...">
+                </div>
+                <button class="btn-sync" id="sync-btn" onclick="syncData()">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    Sync from GitHub
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-filter="all" onclick="setFilter('all')">
+                All Scripts <span class="count" id="count-all">0</span>
+            </button>
+            <button class="tab" data-filter="verified" onclick="setFilter('verified')">
+                <i class="fa-solid fa-circle-check me-1" style="color: var(--accent-verified)"></i>
+                Verified <span class="count" id="count-verified">0</span>
+            </button>
+            <button class="tab" data-filter="community" onclick="setFilter('community')">
+                <i class="fa-solid fa-users me-1" style="color: var(--accent-community)"></i>
+                Community <span class="count" id="count-community">0</span>
+            </button>
+        </div>
+
+        <!-- Scripts List -->
+        <div id="scripts-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                Powered by <a href="https://pinokio.computer" target="_blank">Pinokio</a> &bull;
+                Data from <a href="https://github.com" target="_blank">GitHub</a> (topics + code search) &bull;
+                <span id="last-synced">Never synced</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        let allScripts = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
+
+        // Fetch and display leaderboard data
+        async function fetchLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard?limit=500');
+                allScripts = await response.json();
+                renderScripts();
+                updateCounts();
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                document.getElementById('scripts-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <p>Failed to load scripts. Please try syncing.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Fetch stats
+        async function fetchStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+
+                document.getElementById('stat-total').textContent = stats.total || 0;
+                document.getElementById('stat-verified').textContent = stats.verified || 0;
+                document.getElementById('stat-community').textContent = stats.community || 0;
+                document.getElementById('stat-stars').textContent = formatNumber(stats.total_stars || 0);
+
+                if (stats.last_synced) {
+                    const date = new Date(stats.last_synced);
+                    document.getElementById('last-synced').textContent = `Last synced: ${date.toLocaleString()}`;
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
+        // Render scripts based on current filter and search
+        function renderScripts() {
+            const container = document.getElementById('scripts-container');
+
+            let filtered = allScripts;
+
+            // Apply type filter
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(s => s.type === currentFilter);
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                filtered = filtered.filter(s =>
+                    s.name.toLowerCase().includes(query) ||
+                    (s.description && s.description.toLowerCase().includes(query)) ||
+                    s.owner.toLowerCase().includes(query)
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box-open"></i>
+                        <p>No scripts found. Try syncing from GitHub.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="scripts-grid">';
+
+            filtered.forEach((script, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'gold';
+                else if (rank === 2) rankClass = 'silver';
+                else if (rank === 3) rankClass = 'bronze';
+
+                const isVerified = script.type === 'verified';
+                const topics = script.topics ? script.topics.slice(0, 3) : [];
+
+                html += `
+                    <a href="${script.html_url}" target="_blank" class="script-card">
+                        <div class="rank ${rankClass}">${rank}</div>
+                        <img src="${script.owner_avatar}" alt="${script.owner}" class="script-avatar">
+                        <div class="script-info">
+                            <div class="script-name">
+                                ${script.name}
+                                ${isVerified ? '<span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Verified</span>' : ''}
+                            </div>
+                            <div class="script-owner">
+                                <i class="fa-brands fa-github"></i>
+                                ${script.owner}
+                            </div>
+                            ${script.description ? `<div class="script-description">${escapeHtml(script.description)}</div>` : ''}
+                            ${topics.length > 0 ? `
+                                <div class="topics">
+                                    ${topics.map(t => `<span class="topic">${t}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="script-stats">
+                            <div class="stat stars">
+                                <i class="fa-solid fa-star"></i>
+                                ${formatNumber(script.stars)}
+                            </div>
+                            <div class="stat forks">
+                                <i class="fa-solid fa-code-fork"></i>
+                                ${formatNumber(script.forks)}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Update tab counts
+        function updateCounts() {
+            const all = allScripts.length;
+            const verified = allScripts.filter(s => s.type === 'verified').length;
+            const community = allScripts.filter(s => s.type === 'community').length;
+
+            document.getElementById('count-all').textContent = all;
+            document.getElementById('count-verified').textContent = verified;
+            document.getElementById('count-community').textContent = community;
+        }
+
+        // Set filter
+        function setFilter(filter) {
+            currentFilter = filter;
+
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.filter === filter);
+            });
+
+            renderScripts();
+        }
+
+        // Sync data from GitHub
+        async function syncData() {
+            const btn = document.getElementById('sync-btn');
+            btn.disabled = true;
+            btn.classList.add('syncing');
+
+            try {
+                const response = await fetch('/api/sync', { method: 'POST' });
+                const result = await response.json();
+
+                if (result.success) {
+                    await fetchLeaderboard();
+                    await fetchStats();
+                    const parts = [`${result.total} repos synced`];
+                    if (result.fromTopic !== undefined) parts.push(`${result.fromTopic} from topic`);
+                    if (result.fromCode !== undefined) parts.push(`${result.fromCode} from code search`);
+                    console.log('Sync result:', parts.join(', '));
+                } else {
+                    alert('Sync failed: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Sync error:', error);
+                alert('Failed to sync: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('syncing');
+            }
+        }
+
+        // Helper: Format large numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Helper: Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Search handler with debounce
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = e.target.value.trim();
+                renderScripts();
+            }, 300);
+        });
+
+        // Initial load
+        fetchLeaderboard();
+        fetchStats();
+    </script>
+</body>
+</html>

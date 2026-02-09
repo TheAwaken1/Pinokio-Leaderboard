@@ -1,0 +1,14 @@
+{
+  "name": "pinokio-leaderboard",
+  "version": "2.0.0",
+  "description": "Track the most popular Pinokio scripts from verified publishers and the community",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7",
+    "cors": "^2.8.5"
+  }
+}
