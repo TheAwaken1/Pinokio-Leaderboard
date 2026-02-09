@@ -1,6 +1,6 @@
 # Pinokio Leaderboard
 
-Track the most popular Pinokio scripts from verified publishers and the community. Data is synced live from GitHub repositories tagged with `pinokio`.
+Track the most popular Pinokio scripts from verified publishers and the community. Data is synced live from GitHub repositories tagged with `pinokio`, and with the following files pinokio.js, and pinokio.json.
 
 ## Features
 
@@ -18,125 +18,35 @@ Track the most popular Pinokio scripts from verified publishers and the communit
 4. **Browse**: Use tabs to filter between All/Verified/Community scripts
 5. **Search**: Type in the search box to find specific scripts
 
-## Data Source
+## To Search Pinokio.js and Pinokio.json files You Will Need a Github Token
+
+Step-by-step: Create a basic token (takes ~30 seconds)
+
+Go to → https://github.com/settings/tokens
+(or: profile photo → Settings → Developer settings → Personal access tokens → Tokens (classic))
+Click Generate new token → Generate new token (classic)
+Fill in:
+Note: something like My search app token (so you remember what it’s for)
+Expiration: choose 30 days, 60 days, or “No expiration” (I recommend setting one for security)
+Scopes: leave everything unchecked (this is the “basic” part — it only allows public read access)
+
+Click Generate token at the bottom.
+Copy the token immediately (it starts with ghp_).
+You will never see it again!
+
+That’s it. Your token is now ready.
+
+## Launch the Pinokio Leaderboard app
+
+1. Once lauched, click on terminal tab and stop
+2. You will see a settings tab right next to the "Start" tab, click on it
+3. A pop up to enter your Github Token pops up, paste your token and save
+4. Relaunch the app and sync
 
 The leaderboard fetches data from GitHub's search API:
-- Query: `topic:pinokio`
+- Query: `topic:pinokio, files:pinokio.js & pinokio.json`
 - Sorted by: Stars (descending)
 - Up to 100 repositories per sync
-
-### Verified Publishers
-
-Scripts from these publishers are marked as "Verified":
-- `cocktailpeanut` - Pinokio creator and maintainer
-- `pinokiofactory` - Official Pinokio Factory
-- `facefusion` - Face manipulation platform
-- `pinokiocomputer` - Pinokio Computer official
-
-## API Reference
-
-### Get Leaderboard
-
-```bash
-GET /api/leaderboard?type=verified&limit=50&search=comfy
-```
-
-Parameters:
-- `type` (optional): `verified` or `community`
-- `limit` (optional): Number of results (default: 50)
-- `search` (optional): Search term
-
-**Response:**
-```json
-[
-  {
-    "id": "123456",
-    "name": "comfyui.pinokio",
-    "full_name": "cocktailpeanut/comfyui.pinokio",
-    "description": "A 1-click launcher for ComfyUI",
-    "html_url": "https://github.com/cocktailpeanut/comfyui.pinokio",
-    "stars": 36,
-    "forks": 5,
-    "owner": "cocktailpeanut",
-    "owner_avatar": "https://avatars.githubusercontent.com/u/...",
-    "type": "verified",
-    "topics": ["pinokio", "comfyui"],
-    "updated_at": "2024-01-15T10:30:00Z"
-  }
-]
-```
-
-### Get Stats
-
-```bash
-GET /api/stats
-```
-
-**Response:**
-```json
-{
-  "total": 100,
-  "verified": 15,
-  "community": 85,
-  "total_stars": 2500,
-  "last_synced": "2024-01-15T10:30:00Z"
-}
-```
-
-### Sync from GitHub
-
-```bash
-POST /api/sync
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "verified": 15,
-  "community": 85,
-  "total": 100
-}
-```
-
-### JavaScript Example
-
-```javascript
-// Fetch all verified scripts
-const response = await fetch('/api/leaderboard?type=verified');
-const scripts = await response.json();
-
-console.log(`Found ${scripts.length} verified scripts`);
-scripts.forEach(s => {
-  console.log(`${s.name} by ${s.owner} - ${s.stars} stars`);
-});
-```
-
-### Python Example
-
-```python
-import requests
-
-# Search for TTS scripts
-response = requests.get('http://localhost:3000/api/leaderboard', params={
-    'search': 'tts',
-    'limit': 10
-})
-scripts = response.json()
-
-for script in scripts:
-    print(f"{script['name']}: {script['stars']} stars")
-```
-
-### cURL Example
-
-```bash
-# Get top 10 community scripts
-curl "http://localhost:3000/api/leaderboard?type=community&limit=10"
-
-# Trigger a sync
-curl -X POST "http://localhost:3000/api/sync"
-```
 
 ## Technical Details
 
