@@ -4,7 +4,6 @@ module.exports = {
     {
       method: "shell.run",
       params: {
-        venv: "env",
         env: {
           PORT: "{{port}}"
         },

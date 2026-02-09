@@ -5,7 +5,7 @@ module.exports = {
   description: "A leaderboard of Pinokio apps from GITHUB that has a 'Pinokio' tag, ranking is based on github stars",
   icon: "icon.png",
   menu: async (kernel, info) => {
-    let installed = info.exists("app/env")
+    let installed = info.exists("app/node_modules")
     let running = {
       install: info.running("install.js"),
       start: info.running("start.js"),
